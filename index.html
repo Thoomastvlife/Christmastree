@@ -196,30 +196,34 @@
             margin-bottom: 15px;
             text-shadow: 0 0 5px #fff;
         }
-        /* 文本輪播容器 */
+        /* 文本輪播容器 - 優化高度計算 */
         .card-content-wrapper {
-            height: 120px; /* 固定高度，避免卡片跳動 */
+            height: auto;
+            min-height: 120px; /* 最小高度，適配不同文本 */
+            max-height: 150px; /* 最大高度，防止過長 */
             overflow: hidden;
             position: relative;
             margin-bottom: 20px;
+            padding: 0 10px;
         }
         /* 輪播文本項 */
         .card-content-item {
             position: absolute;
             top: 0;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
             width: 100%;
             font-size: 18px;
             color: #2D3436;
             line-height: 1.6;
             opacity: 0;
-            transform: translateY(20px);
             transition: all 0.5s ease;
+            padding: 0 5px;
         }
         /* 當前顯示的文本 */
         .card-content-item.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(-50%) translateY(0);
         }
         .card-footer {
             font-size: 14px;
@@ -229,12 +233,12 @@
     </style>
 </head>
 <body>
-    <!-- 音樂控制 -->
+    <!-- 音樂控制 - 修復閉合標籤 -->
     <button id="music-btn">🔇 播放音樂</button>
     <audio id="bg-music" loop preload="auto">
         <source src="tree.mp3" type="audio/mpeg">
         你的瀏覽器不支援音頻播放
-    
+    </audio>
 
     <!-- 聖誕樹容器（原版結構 + 點擊事件） -->
     <div class="tree-container" id="tree">
@@ -247,7 +251,7 @@
         <p>祝你聖誕快樂，幸福永遠</p>
     </div>
 
-    <!-- 版權資訊（修改為個人） -->
+    <!-- 版權資訊（個人化） -->
     <div class="copyright">© 2025 YT個人早安咖啡, all rights reserved</div>
 
     <!-- 聖誕卡片遮罩層 -->
@@ -257,7 +261,7 @@
             <h2 class="card-title">🎄 聖誕快樂 🎄</h2>
             <!-- 文本輪播容器 -->
             <div class="card-content-wrapper" id="cardContentWrapper">
-                <!-- 多段交替文本（修改為個人視角） -->
+                <!-- 多段交替文本（個人化） -->
                 <div class="card-content-item active">
                     親愛的朋友：<br><br>感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT個人早安咖啡祝你和你的家人聖誕快樂、平安喜樂！
                 </div>
@@ -276,41 +280,41 @@
     </div>
 
     <script>
-        // 音樂控制（原版邏輯+兼容優化）
+        // 音樂控制（優化邏輯，避免重複綁定）
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
+        let musicInitiated = false; // 新增標記，避免重複播放
         audio.volume = 0.4;
 
-        // 全域點擊/觸摸播放音樂
-        document.addEventListener('click', playMusic);
-        document.addEventListener('touchstart', playMusic);
-
+        // 音樂播放函數（優化）
         function playMusic() {
-            if (!isMusicOn) {
+            if (!isMusicOn && !musicInitiated) {
+                musicInitiated = true; // 標記已嘗試播放
                 audio.play().then(() => {
                     isMusicOn = true;
                     musicBtn.textContent = "🔊 關閉音樂";
-                    document.removeEventListener('click', playMusic);
-                    document.removeEventListener('touchstart', playMusic);
                 }).catch((err) => {
                     console.log("播放提示：", err);
                     musicBtn.textContent = "🔇 點擊手動播放";
+                    musicInitiated = false; // 重置標記，允許再次嘗試
                 });
             }
         }
 
+        // 全域點擊/觸摸播放音樂（只綁定一次）
+        document.addEventListener('click', playMusic, { once: true });
+        document.addEventListener('touchstart', playMusic, { once: true });
+
         // 音樂按鈕控制
-        musicBtn.addEventListener('click', () => {
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 防止觸發全域播放
             if (isMusicOn) {
                 audio.pause();
                 isMusicOn = false;
                 musicBtn.textContent = "🔇 播放音樂";
             } else {
-                audio.play().then(() => {
-                    isMusicOn = true;
-                    musicBtn.textContent = "🔊 關閉音樂";
-                });
+                playMusic(); // 調用統一的播放函數
             }
         });
 
@@ -319,29 +323,45 @@
         const dotCount = 180; // 原版數量
         const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700']; // 原版顏色
 
-        for (let i = 0; i < dotCount; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
+        // 優化：分批生成光點，避免一次性渲染卡住
+        let dotIndex = 0;
+        function createDotBatch() {
+            // 每次生成10個光點，減少主執行緒阻塞
+            for (let i = 0; i < 10 && dotIndex < dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                
+                const height = dotIndex * 2;
+                const radius = dotIndex * 0.8;
+                const angle = dotIndex * 0.25;
+                
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+                
+                dot.style.color = colors[Math.floor(Math.random() * colors.length)];
+                dot.style.background = dot.style.color;
+                
+                dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
+                tree.appendChild(dot);
+                
+                dotIndex++;
+            }
             
-            // 原版坐標計算公式
-            const height = i * 2;
-            const radius = i * 0.8;
-            const angle = i * 0.25;
-            
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            
-            // 原版隨機顏色
-            dot.style.color = colors[Math.floor(Math.random() * colors.length)];
-            dot.style.background = dot.style.color;
-            
-            // 原版3D變換
-            dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
-            tree.appendChild(dot);
+            if (dotIndex < dotCount) {
+                // 下一幀繼續生成，避免卡住
+                requestAnimationFrame(createDotBatch);
+            }
         }
 
-        // 雪花生成（原版邏輯+手機端修復）
+        // 啟動分批生成光點
+        requestAnimationFrame(createDotBatch);
+
+        // 雪花生成（優化：限制同時生成數量）
+        let snowCount = 0;
+        const MAX_SNOW = 30; // 最多同時顯示30個雪花
         function createSnow() {
+            if (snowCount >= MAX_SNOW) return;
+            
             const snow = document.createElement('div');
             snow.className = 'snow';
             snow.textContent = '❄';
@@ -349,31 +369,33 @@
             snow.style.animationDuration = Math.random() * 4 + 3 + 's';
             
             document.body.appendChild(snow);
-            setTimeout(() => snow.remove(), 7000);
+            snowCount++;
+            
+            // 雪花消失後計數減少
+            setTimeout(() => {
+                snow.remove();
+                snowCount--;
+            }, 7000);
         }
-        setInterval(createSnow, 200); // 原版生成頻率
 
-        // 聖誕卡片交互邏輯
+        // 優化雪花生成定時器
+        setInterval(createSnow, 200);
+
+        // 聖誕卡片交互邏輯（徹底優化定時器）
         const treeContainer = document.getElementById('tree');
         const cardOverlay = document.getElementById('cardOverlay');
         const closeCard = document.getElementById('closeCard');
-        // 文本輪播相關
         const contentWrapper = document.getElementById('cardContentWrapper');
         const contentItems = contentWrapper.querySelectorAll('.card-content-item');
         let currentIndex = 0;
         let carouselTimer = null;
 
-        // 文本輪播函數
+        // 文本輪播函數（優化：防止重複定時器）
         function startTextCarousel() {
-            // 清除之前的定時器
-            if (carouselTimer) clearInterval(carouselTimer);
-            // 每3秒切換一次文本
+            stopTextCarousel(); // 先停止舊的定時器
             carouselTimer = setInterval(() => {
-                // 隱藏當前文本
                 contentItems[currentIndex].classList.remove('active');
-                // 計算下一索引
                 currentIndex = (currentIndex + 1) % contentItems.length;
-                // 顯示下一文本
                 contentItems[currentIndex].classList.add('active');
             }, 3000);
         }
@@ -384,51 +406,58 @@
                 clearInterval(carouselTimer);
                 carouselTimer = null;
             }
-            // 重置當前索引
             currentIndex = 0;
             contentItems.forEach((item, idx) => {
                 item.classList.toggle('active', idx === 0);
             });
         }
 
-        // 點擊聖誕樹打開卡片
+        // 點擊聖誕樹打開卡片（優化：防止重複點擊）
+        let isCardOpen = false;
         treeContainer.addEventListener('click', (e) => {
-            e.stopPropagation(); // 防止觸發音樂播放的全域事件
+            e.stopPropagation();
+            if (isCardOpen) return; // 已打開則不重複執行
+            
+            isCardOpen = true;
             cardOverlay.classList.add('active');
-            // 卡片打開時暫停聖誕樹旋轉
             treeContainer.style.animationPlayState = 'paused';
-            // 啟動文本輪播
             startTextCarousel();
         });
 
-        // 點擊關閉按鈕關閉卡片
-        closeCard.addEventListener('click', () => {
+        // 關閉卡片通用函數
+        function closeCardHandler() {
+            isCardOpen = false;
             cardOverlay.classList.remove('active');
-            // 恢復聖誕樹旋轉
             treeContainer.style.animationPlayState = 'running';
-            // 停止文本輪播並重置
             stopTextCarousel();
-        });
+        }
 
-        // 點擊遮罩層關閉卡片
+        // 點擊關閉按鈕
+        closeCard.addEventListener('click', closeCardHandler);
+
+        // 點擊遮罩層
         cardOverlay.addEventListener('click', (e) => {
             if (e.target === cardOverlay) {
-                cardOverlay.classList.remove('active');
-                treeContainer.style.animationPlayState = 'running';
-                stopTextCarousel();
+                closeCardHandler();
             }
         });
 
         // 手機端觸摸支援
         treeContainer.addEventListener('touchstart', (e) => {
             e.stopPropagation();
+            if (isCardOpen) return;
+            
+            isCardOpen = true;
             cardOverlay.classList.add('active');
             treeContainer.style.animationPlayState = 'paused';
             startTextCarousel();
         });
 
-        // 頁面卸載時清除定時器
-        window.addEventListener('unload', stopTextCarousel);
+        // 頁面卸載時清理資源
+        window.addEventListener('beforeunload', () => {
+            stopTextCarousel();
+            audio.pause();
+        });
     </script>
 </body>
 </html>
