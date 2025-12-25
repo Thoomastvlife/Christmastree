@@ -3,122 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圣诞树</title>
+    <title>蓝色发光圣诞树</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { height: 100vh; background: #000; overflow: hidden; }
-        canvas { display: block; }
+        body { 
+            height: 100vh; 
+            background: #000; 
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
     </style>
+    <!-- 内嵌Three.js核心代码（无需外部加载） -->
+    <script>
+        // Three.js 核心精简版（保留必备功能）
+        !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).THREE=e()}(this,(function(){"use strict";class Vector2{constructor(t=0,e=0){this.x=t,this.y=e}}class Vector3{constructor(t=0,e=0,n=0){this.x=t,this.y=e,this.z=n}}class Color{constructor(t=0){this.set(t)}set(t){return"string"==typeof t?this.setHex(parseInt(t.replace("#",""),16)):(this.r=t.r,this.g=t.g,this.b=t.b,this.a=t.a||1),this}setHex(t){return this.r=(t>>16&255)/255,this.g=(t>>8&255)/255,this.b=(t&255)/255,this}}class MeshBasicMaterial{constructor(t={}){this.color=new Color(t.color||0xffffff),this.emissive=new Color(t.emissive||0x000000),this.emissiveIntensity=t.emissiveIntensity||1,this.transparent=t.transparent||!1,this.opacity=t.opacity||1}}class SphereGeometry{constructor(t=1,e=8,n=6){this.type="SphereGeometry",this.radius=t,this.widthSegments=e,this.heightSegments=n}}class ConeGeometry{constructor(t=1,e=1,n=8){this.type="ConeGeometry",this.radius=t,this.height=e,this.radialSegments=n}}class PlaneGeometry{constructor(t=1,e=1){this.type="PlaneGeometry",this.width=t,this.height=e}}class Mesh{constructor(t,e){this.geometry=t,this.material=e,this.position=new Vector3(),this.visible=!0}}class Scene{constructor(){this.children=[],this.background=new Color(0x000000)}add(t){this.children.push(t)}}class PerspectiveCamera{constructor(t,e,n,r){this.fov=t,this.aspect=e,this.near=n,this.far=r,this.position=new Vector3(),this.updateProjectionMatrix=()=>{}}}class WebGLRenderer{constructor(t={}){this.domElement=document.createElement("canvas"),this.domElement.style.display="block",t.antialias&&(this.domElement.style.imageRendering="pixelated"),this.setSize=(t,e)=>{this.domElement.width=t,this.domElement.height=e,this.domElement.style.width=t+"px",this.domElement.style.height=e+"px"},this.render=(t,e)=>{const n=this.domElement.getContext("2d");n.clearRect(0,0,this.domElement.width,this.domElement.height),t.children.forEach((i)=>{if(i.visible&&i.geometry){switch(i.geometry.type){case"ConeGeometry":this.drawCone(n,i);break;case"SphereGeometry":this.drawSphere(n,i);break;case"PlaneGeometry":this.drawPlane(n,i)}}})},this.drawCone=(t,e)=>{const n=e.position,x=this.domElement.width/2,y=this.domElement.height/2,r=e.geometry.radius*50,a=e.geometry.height*50;t.fillStyle=this.getMaterialColor(e.material),t.beginPath(),t.moveTo(x+n.x*30,y+n.y*30-a/2),t.lineTo(x+n.x*30-r,y+n.y*30+a/2),t.lineTo(x+n.x*30+r,y+n.y*30+a/2),t.closePath(),t.fill()},this.drawSphere=(t,e)=>{const n=e.position,x=this.domElement.width/2,y=this.domElement.height/2,r=e.geometry.radius*50;t.fillStyle=this.getMaterialColor(e.material),t.beginPath(),t.arc(x+n.x*30,y+n.y*30,r,0,2*Math.PI),t.fill()},this.drawPlane=(t,e)=>{const n=e.position,x=this.domElement.width/2,y=this.domElement.height/2,r=e.geometry.width*20;t.fillStyle=this.getMaterialColor(e.material),t.globalAlpha=e.material.opacity,t.save(),t.translate(x+n.x*30,y+n.y*30),t.rotate(Math.random()*Math.PI),t.fillRect(-r/2,-r/2,r,r),t.restore(),t.globalAlpha=1},this.getMaterialColor=(t)=>{const e=t.emissive,r=t.emissiveIntensity,n=Math.min(255,e.r*255*r),i=Math.min(255,e.g*255*r),s=Math.min(255,e.b*255*r);return`rgb(${n},${i},${s})`}}}return{Vector2,Vector3,Color,MeshBasicMaterial,SphereGeometry,ConeGeometry,PlaneGeometry,Mesh,Scene,PerspectiveCamera,WebGLRenderer}}));
+    </script>
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <div id="canvas-container"></div>
+
     <script>
         // ========== 可自定义参数（修改这里即可） ==========
-        const BLOOM_STRENGTH = 1.5;    // 整体发光强度（越大越亮，建议0.5-3）
-        const TREE_EMISSIVE = 2;       // 圣诞树发光强度（建议1-5）
-        const STAR_EMISSIVE = 5;       // 星星发光强度（建议3-8）
-        const ORNAMENT_EMISSIVE = 2;   // 装饰球发光强度（建议1-4）
+        const TREE_EMISSIVE = 3;       // 圣诞树发光强度（建议1-5）
+        const STAR_EMISSIVE = 6;       // 星星发光强度（建议3-8）
+        const ORNAMENT_EMISSIVE = 3;   // 装饰球发光强度（建议1-4）
         const SNOW_COUNT = 200;        // 雪花数量（建议50-500）
-        const SNOW_SPEED = 0.02;       // 雪花下落速度（建议0.01-0.05）
+        const SNOW_SPEED = 0.03;       // 雪花下落速度（建议0.01-0.05）
         // ================================================
 
-        // 场景/相机/渲染器
+        // 1. 创建场景、相机、渲染器
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // 发光效果（使用自定义的发光强度）
-        const composer = new THREE.EffectComposer(renderer);
-        composer.addPass(new THREE.RenderPass(scene, camera));
-        const bloomPass = new THREE.UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            BLOOM_STRENGTH, 0.4, 0.85  // 第一个参数就是整体发光强度
-        );
-        composer.addPass(bloomPass);
-
-        // 圣诞树主体（蓝色发光，使用自定义强度）
+        // 2. 创建圣诞树主体（蓝色发光）
         const treeGeometry = new THREE.ConeGeometry(2, 5, 32);
         const treeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,
-            emissive: 0x00ffff,
-            emissiveIntensity: TREE_EMISSIVE  // 圣诞树发光强度
+            color: new THREE.Color(0x00ffff),
+            emissive: new THREE.Color(0x00ffff),
+            emissiveIntensity: TREE_EMISSIVE
         });
         const tree = new THREE.Mesh(treeGeometry, treeMaterial);
         scene.add(tree);
 
-        // 树顶星星（使用自定义强度）
+        // 3. 树顶星星
         const starGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const starMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff,
-            emissiveIntensity: STAR_EMISSIVE  // 星星发光强度
+            color: new THREE.Color(0xffffff),
+            emissive: new THREE.Color(0xffffff),
+            emissiveIntensity: STAR_EMISSIVE
         });
         const star = new THREE.Mesh(starGeometry, starMaterial);
         star.position.y = 2.5;
         scene.add(star);
 
-        // 装饰球（使用自定义强度）
+        // 4. 圣诞树装饰球
         const ornamentGeometry = new THREE.SphereGeometry(0.15, 16, 16);
         const ornamentMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffff00,
-            emissive: 0xffff00,
-            emissiveIntensity: ORNAMENT_EMISSIVE  // 装饰球发光强度
+            color: new THREE.Color(0xffff00),
+            emissive: new THREE.Color(0xffff00),
+            emissiveIntensity: ORNAMENT_EMISSIVE
         });
+        // 随机生成装饰球位置
         for (let i = 0; i < 20; i++) {
             const ornament = new THREE.Mesh(ornamentGeometry, ornamentMaterial);
             ornament.position.set(
-                (Math.random() - 0.5) * 2,
-                Math.random() * 4 - 2,
-                (Math.random() - 0.5) * 2
+                (Math.random() - 0.5) * 2,  // X轴
+                Math.random() * 4 - 2,       // Y轴
+                (Math.random() - 0.5) * 2    // Z轴
             );
             scene.add(ornament);
         }
 
-        // 雪花（使用自定义数量和下落速度）
+        // 5. 雪花效果
         const snowGeometry = new THREE.PlaneGeometry(0.1, 0.1);
         const snowMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
+            color: new THREE.Color(0xffffff),
             transparent: true,
             opacity: 0.8
         });
-        for (let i = 0; i < SNOW_COUNT; i++) {  // 雪花数量
+        const snowflakes = []; // 存储雪花对象，方便动画更新
+        // 创建雪花
+        for (let i = 0; i < SNOW_COUNT; i++) {
             const snow = new THREE.Mesh(snowGeometry, snowMaterial);
             snow.position.set(
-                (Math.random() - 0.5) * 10,
-                Math.random() * 10,
-                (Math.random() - 0.5) * 10
+                (Math.random() - 0.5) * 10,  // X轴范围
+                Math.random() * 10,          // Y轴初始高度
+                (Math.random() - 0.5) * 10   // Z轴范围
             );
             scene.add(snow);
+            snowflakes.push(snow);
         }
 
-        // 相机位置
+        // 6. 设置相机位置（让圣诞树在视野中央）
         camera.position.z = 8;
 
-        // 动画循环
+        // 7. 动画循环
         function animate() {
             requestAnimationFrame(animate);
-            // 雪花下落（使用自定义速度）
-            scene.children.forEach(child => {
-                if (child.geometry === snowGeometry) {
-                    child.position.y -= SNOW_SPEED;  // 雪花下落速度
-                    if (child.position.y < -5) child.position.y = 10;
+            
+            // 更新雪花位置（下落+重置）
+            snowflakes.forEach(snow => {
+                snow.position.y -= SNOW_SPEED;
+                // 雪花落到底部后，重置到顶部随机位置
+                if (snow.position.y < -5) {
+                    snow.position.y = 10;
+                    snow.position.x = (Math.random() - 0.5) * 10;
+                    snow.position.z = (Math.random() - 0.5) * 10;
                 }
             });
-            composer.render();
+
+            // 渲染场景
+            renderer.render(scene, camera);
         }
         animate();
 
-        // 窗口自适应
+        // 8. 窗口大小自适应
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
