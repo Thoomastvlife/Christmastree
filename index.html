@@ -1,133 +1,125 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>浪漫聖誕樹</title>
+    <title>圣诞树</title>
     <style>
-        body {
-            background-color: #000a00;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            perspective: 1200px;
-        }
-
-        /* 旋轉容器：確保高度與樹一致，並將旋轉中心設在樹中心 */
-        .tree-container {
-            position: relative;
-            width: 300px;
-            height: 450px;
-            transform-style: preserve-3d;
-            animation: rotateTree 12s infinite linear;
-            margin-bottom: 50px;
-        }
-
-        @keyframes rotateTree {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        .dot {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            /* 讓光點有發光感 */
-            box-shadow: 0 0 8px 1px white;
-        }
-
-        /* 修正星星位置，確保在最頂端 */
-        .star {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%) translateZ(0px);
-            color: gold;
-            font-size: 50px;
-            filter: drop-shadow(0 0 15px gold);
-            z-index: 100;
-        }
-
-        .message {
-            text-align: center;
-            color: white;
-            font-family: 'Microsoft JhengHei', sans-serif;
-            z-index: 10;
-        }
-
-        h1 { font-size: 2em; margin: 0; color: #ff4d4d; text-shadow: 0 0 10px #fff; }
-
-        .snow {
-            position: absolute;
-            top: -10px;
-            color: white;
-            pointer-events: none;
-            animation: fall linear forwards;
-        }
-
-        @keyframes fall {
-            to { transform: translateY(110vh); }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { height: 100vh; background: #000; overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
-
-    <div class="tree-container" id="tree">
-        <div class="star">★</div>
-        </div>
-
-    <div class="message">
-        <h1>Merry Christmas</h1>
-        <p>這是一份專屬你的聖誕驚喜</p>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     <script>
-        const treeContainer = document.getElementById('tree');
-        const dotsCount = 250; 
+        // ========== 可自定义参数（修改这里即可） ==========
+        const BLOOM_STRENGTH = 1.5;    // 整体发光强度（越大越亮，建议0.5-3）
+        const TREE_EMISSIVE = 2;       // 圣诞树发光强度（建议1-5）
+        const STAR_EMISSIVE = 5;       // 星星发光强度（建议3-8）
+        const ORNAMENT_EMISSIVE = 2;   // 装饰球发光强度（建议1-4）
+        const SNOW_COUNT = 200;        // 雪花数量（建议50-500）
+        const SNOW_SPEED = 0.02;       // 雪花下落速度（建议0.01-0.05）
+        // ================================================
 
-        for (let i = 0; i < dotsCount; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            
-            // --- 修正邏輯 ---
-            // i=0 是樹頂，i=250 是樹底
-            // 高度 y 從 0 (頂) 增加到 400 (底)
-            const y = i * 1.6; 
-            // 半徑 radius 從 0 (頂) 增加到 120 (底)
-            const radius = i * 0.5; 
-            // 旋轉角度
-            const angle = i * 0.25; 
-            
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            
-            // 隨機顏色
-            const colors = ['#ff0000', '#228b22', '#ffffff', '#ffeb3b', '#00ff00'];
-            dot.style.background = colors[Math.floor(Math.random() * colors.length)];
-            
-            // 座標偏移：讓中心點對準容器中心
-            dot.style.transform = `translate3d(${x + 150}px, ${y}px, ${z}px)`;
-            treeContainer.appendChild(dot);
+        // 场景/相机/渲染器
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 发光效果（使用自定义的发光强度）
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(new THREE.RenderPass(scene, camera));
+        const bloomPass = new THREE.UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            BLOOM_STRENGTH, 0.4, 0.85  // 第一个参数就是整体发光强度
+        );
+        composer.addPass(bloomPass);
+
+        // 圣诞树主体（蓝色发光，使用自定义强度）
+        const treeGeometry = new THREE.ConeGeometry(2, 5, 32);
+        const treeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            emissive: 0x00ffff,
+            emissiveIntensity: TREE_EMISSIVE  // 圣诞树发光强度
+        });
+        const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+        scene.add(tree);
+
+        // 树顶星星（使用自定义强度）
+        const starGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+        const starMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            emissive: 0xffffff,
+            emissiveIntensity: STAR_EMISSIVE  // 星星发光强度
+        });
+        const star = new THREE.Mesh(starGeometry, starMaterial);
+        star.position.y = 2.5;
+        scene.add(star);
+
+        // 装饰球（使用自定义强度）
+        const ornamentGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const ornamentMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            emissive: 0xffff00,
+            emissiveIntensity: ORNAMENT_EMISSIVE  // 装饰球发光强度
+        });
+        for (let i = 0; i < 20; i++) {
+            const ornament = new THREE.Mesh(ornamentGeometry, ornamentMaterial);
+            ornament.position.set(
+                (Math.random() - 0.5) * 2,
+                Math.random() * 4 - 2,
+                (Math.random() - 0.5) * 2
+            );
+            scene.add(ornament);
         }
 
-        // 雪花系統
-        function createSnow() {
-            const snow = document.createElement('div');
-            snow.className = 'snow';
-            snow.innerText = '❄';
-            snow.style.left = Math.random() * 100 + 'vw';
-            snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
-            snow.style.opacity = Math.random();
-            snow.style.animationDuration = (Math.random() * 3 + 4) + 's';
-            document.body.appendChild(snow);
-            setTimeout(() => { snow.remove(); }, 6000);
+        // 雪花（使用自定义数量和下落速度）
+        const snowGeometry = new THREE.PlaneGeometry(0.1, 0.1);
+        const snowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.8
+        });
+        for (let i = 0; i < SNOW_COUNT; i++) {  // 雪花数量
+            const snow = new THREE.Mesh(snowGeometry, snowMaterial);
+            snow.position.set(
+                (Math.random() - 0.5) * 10,
+                Math.random() * 10,
+                (Math.random() - 0.5) * 10
+            );
+            scene.add(snow);
         }
-        setInterval(createSnow, 150);
+
+        // 相机位置
+        camera.position.z = 8;
+
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            // 雪花下落（使用自定义速度）
+            scene.children.forEach(child => {
+                if (child.geometry === snowGeometry) {
+                    child.position.y -= SNOW_SPEED;  // 雪花下落速度
+                    if (child.position.y < -5) child.position.y = 10;
+                }
+            });
+            composer.render();
+        }
+        animate();
+
+        // 窗口自适应
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
