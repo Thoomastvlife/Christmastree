@@ -19,7 +19,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            perspective: 800px; /* 手机端更适配的3D透视 */
+            perspective: 800px; /* 降低透视强度，避免倾斜 */
             font-family: 'Microsoft JhengHei', sans-serif;
         }
 
@@ -49,44 +49,53 @@
             z-index: 999;
         }
 
-        /* 圣诞树容器 - 修复3D布局 */
+        /* 圣诞树容器 - 核心：固定旋转中心+转正 */
         .tree-container {
             position: relative;
             width: 250px;
             height: 350px;
             transform-style: preserve-3d;
+            /* 关键：旋转中心定位到容器正中心，消除倾斜 */
+            transform-origin: center center;
+            /* 初始角度设为0，确保加载时正向 */
             animation: rotateTree 20s infinite linear;
             margin: 20px 0;
         }
 
+        /* 旋转动画：仅绕Y轴正向旋转，无偏移 */
         @keyframes rotateTree {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
         }
 
-        /* 螺旋光带（核心样式：修复模糊+发光） */
+        /* 螺旋光带（核心：统一大小+居中） */
         .dot {
             position: absolute;
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            box-shadow: 0 0 8px 2px currentColor; /* 用color实现发光，更统一 */
+            box-shadow: 0 0 8px 2px currentColor;
             opacity: 0.9;
+            /* 光点定位基准：容器正中心 */
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
         }
 
-        /* 树顶星星 - 修复位置 */
+        /* 树顶星星 - 精准居中转正 */
         .star {
             position: absolute;
             top: -20px;
             left: 50%;
-            transform: translateX(-50%);
+            /* 完全居中，无任何偏移 */
+            transform: translateX(-50%) rotateY(0deg);
             color: #FFD700;
             font-size: 30px;
             text-shadow: 0 0 10px #FFD700;
             z-index: 10;
         }
 
-        /* 文字区域 - 修复模糊+居中 */
+        /* 文字区域 - 清晰居中 */
         .message {
             text-align: center;
             margin-top: 10px;
@@ -105,7 +114,7 @@
             letter-spacing: 1px;
         }
 
-        /* 雪花效果 - 手机端更流畅 */
+        /* 雪花效果 - 流畅不遮挡 */
         .snow {
             position: absolute;
             top: -10px;
@@ -132,7 +141,7 @@
         你的瀏覽器不支援音樂播放
     </audio>
 
-    <!-- 圣诞树 -->
+    <!-- 圣诞树（容器内直接包含星星，确保居中） -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
@@ -144,7 +153,7 @@
     </div>
 
     <script>
-        // 音乐控制
+        // 音乐控制（适配手机触摸）
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
@@ -174,20 +183,21 @@
             }
         });
 
-        // 生成螺旋圣诞树（修复光带样式）
+        // 生成螺旋圣诞树（核心：转正算法）
         const tree = document.getElementById('tree');
-        const dotCount = 150; // 调整光点数量，避免拥挤
+        const dotCount = 150;
         const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700']; // 红/绿/白/金
 
         for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            // 螺旋算法（优化手机端比例）
-            const height = i * 2.2;
-            const radius = (dotCount - i) * 0.7;
-            const angle = i * 0.25; // 调整螺旋密度
+            // 螺旋算法（完全正向，无倾斜）
+            const height = i * 2.2; // 垂直高度（仅Y轴）
+            const radius = (dotCount - i) * 0.7; // 螺旋半径（随高度减小）
+            const angle = i * 0.25; // 旋转角度（仅绕Y轴）
             
+            // 计算X/Z轴位置（保证中心对称，正向显示）
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
@@ -195,8 +205,8 @@
             dot.style.color = colors[Math.floor(Math.random() * colors.length)];
             dot.style.background = dot.style.color;
             
-            // 3D定位（修复偏移）
-            dot.style.transform = `translate3d(${x + 125}px, ${height}px, ${z}px)`;
+            // 3D定位（核心：基于容器中心，完全转正）
+            dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
             tree.appendChild(dot);
         }
 
