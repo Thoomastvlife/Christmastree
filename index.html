@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>聖誕快樂 - 螺旋聖誕樹</title>
     <style>
-        /* 全局重置+手机适配 */
+        /* 全局重置+手機適配 */
         * {
             margin: 0;
             padding: 0;
@@ -21,20 +21,14 @@
             height: 100vh;
             perspective: 800px;
             font-family: 'Microsoft JhengHei', sans-serif;
+            touch-action: manipulation;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+            /* 全局硬件加速基础 */
+            transform: translateZ(0);
         }
 
-        /* 顶部雪花装饰条 */
-        .snow-top {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            text-align: center;
-            color: #87CEFA;
-            font-size: 20px;
-            padding: 5px 0;
-        }
-
-        /* 音乐按钮 */
+        /* 音樂按鈕 */
         #music-btn {
             position: fixed;
             top: 10px;
@@ -45,68 +39,98 @@
             padding: 6px 12px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: clamp(12px, 2vw, 14px);
             z-index: 999;
+            transition: all 0.3s ease;
+        }
+        #music-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
         }
 
-        /* 圣诞树容器 - 正向旋转 */
+        /* 聖誕樹容器 - 核心流畅化优化 */
         .tree-container {
             position: relative;
-            width: 300px;
-            height: 350px;
+            width: clamp(200px, 50vw, 300px);
+            height: clamp(250px, 60vw, 350px);
             transform-style: preserve-3d;
             transform-origin: center center;
-            animation: rotateTree 20s infinite linear;
+            /* 1. 开启硬件加速 + 优化动画 */
+            transform: translateZ(0);
+            will-change: transform; /* 告诉浏览器提前优化 */
+            backface-visibility: hidden; /* 隐藏背面，减少渲染 */
+            /* 2. 优化旋转动画：降低转速+更平滑（线性动画也可加小幅度缓动） */
+            animation: rotateTree 25s infinite linear; 
             margin: 20px 0;
         }
 
+        /* 优化旋转动画：降低角速度，视觉更流畅 */
         @keyframes rotateTree {
-            0% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); }
+            0% { transform: rotateY(0deg) translateZ(0); }
+            100% { transform: rotateY(360deg) translateZ(0); }
         }
 
-        /* 螺旋光带 */
+        /* 螺旋光带 - 流畅化核心优化 */
         .dot {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: clamp(4px, 1vw, 6px);
+            height: clamp(4px, 1vw, 6px);
             border-radius: 50%;
-            box-shadow: 0 0 8px 2px currentColor;
-            opacity: 0.9;
+            /* 1. 优化光晕：更柔和的阴影，减少渲染负担 */
+            box-shadow: 0 0 clamp(5px, 1.5vw, 7px) clamp(1px, 0.3vw, 1.5px) currentColor;
+            opacity: 0.95; /* 提高不透明度，减少闪烁感 */
             left: 50%;
             top: 0;
-            transform: translateX(-50%);
+            /* 2. 硬件加速 + 减少重绘 */
+            transform: translateX(-50%) translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            /* 3. 取消不必要的过渡，避免冲突 */
+            transition: none;
         }
 
-        /* 树顶星星 - 精准居中 */
+        /* 樹頂星星 */
         .star {
             position: absolute;
             top: -20px;
             left: 50%;
-            transform: translateX(-50%) rotateY(0deg);
+            transform: translateX(-50%) rotateY(0deg) translateZ(0);
             color: #FFD700;
-            font-size: 30px;
-            text-shadow: 0 0 10px #FFD700;
+            font-size: clamp(24px, 5vw, 30px);
+            text-shadow: 0 0 clamp(8px, 2vw, 10px) #FFD700;
             z-index: 10;
+            animation: twinkle 2s infinite alternate;
+            will-change: opacity, text-shadow;
         }
 
-        /* 文字区域 */
+        @keyframes twinkle {
+            from { opacity: 0.8; }
+            to { opacity: 1; text-shadow: 0 0 15px #FFD700; }
+        }
+
+        /* 文字區域 */
         .message {
             text-align: center;
             margin-top: 10px;
             pointer-events: none;
+            z-index: 10;
         }
         .message h1 {
-            font-size: 2em;
+            font-size: clamp(1.5em, 5vw, 2em);
             color: #FF4D4D;
-            text-shadow: 0 0 8px #FF4D4D;
+            text-shadow: 0 0 clamp(6px, 2vw, 8px) #FF4D4D;
             margin-bottom: 5px;
+            animation: pulse 3s infinite alternate;
         }
         .message p {
-            font-size: 1em;
+            font-size: clamp(0.8em, 3vw, 1em);
             color: #fff;
-            text-shadow: 0 0 6px #fff;
+            text-shadow: 0 0 clamp(4px, 1.5vw, 6px) #fff;
             letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
 
         /* 雪花效果 */
@@ -114,30 +138,35 @@
             position: absolute;
             top: -10px;
             color: #fff;
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
             opacity: 0.7;
             pointer-events: none;
-            animation: fall 5s linear forwards;
+            animation: fall linear forwards, sway 3s infinite alternate;
         }
 
         @keyframes fall {
             to { transform: translateY(110vh); }
         }
+
+        @keyframes sway {
+            from { transform: translateX(0px); }
+            to { transform: translateX(10px); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <!-- 顶部雪花条 -->
-    <div class="snow-top">❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄</div>
-
-    <!-- 音乐控制 -->
-    <button id="music-btn">🔊 關閉音樂</button>
-    <!-- 核心修改：音频源改为 tree.mp3 -->
+    <!-- 音樂控制 -->
+    <button id="music-btn">🔇 播放音樂</button>
     <audio id="bg-music" loop preload="auto">
         <source src="tree.mp3" type="audio/mpeg">
         你的瀏覽器不支援音頻播放
     </audio>
 
-    <!-- 圣诞树 -->
+    <!-- 聖誕樹 -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
@@ -149,82 +178,126 @@
     </div>
 
     <script>
-        // 音乐控制（适配本地 tree.mp3）
+        // 音樂控制（保留原有逻辑）
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
+        let musicInitiated = false;
         audio.volume = 0.4;
-        audio.preload = "auto"; // 预加载本地音乐
 
-        // 同时监听点击/触摸，确保电脑/手机都能触发
-        document.addEventListener('click', playMusic);
-        document.addEventListener('touchstart', playMusic);
-
-        // 统一播放函数
         function playMusic() {
-            if (!isMusicOn) {
-                audio.play().then(() => {
-                    isMusicOn = true;
-                    musicBtn.textContent = "🔊 關閉音樂";
-                    // 移除重复监听
-                    document.removeEventListener('click', playMusic);
-                    document.removeEventListener('touchstart', playMusic);
-                }).catch((err) => {
-                    console.log("播放提示：", err);
-                    musicBtn.textContent = "🔇 點擊手動播放";
-                });
+            if (musicInitiated) return;
+            musicInitiated = true;
+            
+            audio.play().then(() => {
+                isMusicOn = true;
+                musicBtn.textContent = "🔊 關閉音樂";
+            }).catch((err) => {
+                console.log("音頻播放提示：", err);
+                musicBtn.textContent = "🔇 點擊手動播放";
+                musicInitiated = false;
+            });
+        }
+
+        document.addEventListener('click', initMusic);
+        document.addEventListener('touchstart', initMusic);
+
+        function initMusic() {
+            if (!isMusicOn && !musicInitiated) {
+                playMusic();
             }
         }
 
-        // 音乐按钮兜底
-        musicBtn.addEventListener('click', () => {
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (isMusicOn) {
                 audio.pause();
                 isMusicOn = false;
                 musicBtn.textContent = "🔇 播放音樂";
             } else {
-                audio.play().then(() => {
-                    isMusicOn = true;
-                    musicBtn.textContent = "🔊 關閉音樂";
-                });
+                playMusic();
             }
         });
 
-        // 生成上小下大的螺旋圣诞树
+        // 生成螺旋聖誕樹 - 优化光带流畅度
         const tree = document.getElementById('tree');
-        const dotCount = 180;
-        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700'];
+        const dotCount = 220; // 增加光点数量，减少"断层"（220个更密集）
+        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700', '#00BFFF'];
 
+        // 优化螺旋算法：更平滑的坐标插值
         for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            const height = i * 2;
-            const radius = i * 0.8;
-            const angle = i * 0.25;
+            // 1. 优化高度/半径/角度参数：更线性的增长，减少突变
+            const progress = i / dotCount; // 0~1的进度值，让增长更均匀
+            const height = progress * 380; // 固定总高度，按进度分配
+            const radius = progress * 120; // 固定总半径，避免后期增长过快
+            const angle = i * 0.28; // 微调角度，让螺旋更紧密
             
+            // 2. 计算3D坐标：用Math.cos/sin的高精度值
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
-            dot.style.color = colors[Math.floor(Math.random() * colors.length)];
+            // 3. 颜色优化：相邻光点颜色过渡更自然（避免跳色）
+            const colorIndex = Math.floor((i / dotCount) * colors.length);
+            dot.style.color = colors[colorIndex % colors.length];
             dot.style.background = dot.style.color;
             
-            dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
+            // 4. 优化3D变换：合并transform，减少渲染步骤
+            dot.style.transform = `translate3d(${x.toFixed(2)}px, ${height.toFixed(2)}px, ${z.toFixed(2)}px)`;
+            
             tree.appendChild(dot);
         }
 
-        // 生成雪花
+        // 雪花生成（保留原有逻辑）
         function createSnow() {
+            const snowCount = document.querySelectorAll('.snow').length;
+            if (snowCount > 50) return;
+            
             const snow = document.createElement('div');
             snow.className = 'snow';
-            snow.textContent = '❄';
+            snow.textContent = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
             snow.style.left = Math.random() * 100 + 'vw';
             snow.style.animationDuration = Math.random() * 4 + 3 + 's';
+            snow.style.opacity = Math.random() * 0.5 + 0.3;
+            snow.style.animationDelay = Math.random() * 2 + 's';
             
             document.body.appendChild(snow);
-            setTimeout(() => snow.remove(), 7000);
+            
+            setTimeout(() => {
+                if (snow.parentNode) {
+                    snow.remove();
+                }
+            }, 7000);
         }
-        setInterval(createSnow, 200);
+
+        setInterval(createSnow, 300);
+
+        // 视窗大小变化优化
+        window.addEventListener('resize', () => {
+            // 避免resize时重绘圣诞树，保持流畅
+            tree.style.willChange = 'auto';
+            setTimeout(() => {
+                tree.style.willChange = 'transform';
+            }, 100);
+        });
+
+        // 页面焦点优化
+        window.addEventListener('blur', () => {
+            if (isMusicOn) audio.pause();
+            // 后台时降低动画速度，减少性能消耗
+            tree.style.animationDuration = '60s';
+        });
+
+        window.addEventListener('focus', () => {
+            if (isMusicOn) {
+                musicBtn.textContent = "🔇 點擊恢復音樂";
+                isMusicOn = false;
+            }
+            // 前台恢复正常速度
+            tree.style.animationDuration = '25s';
+        });
     </script>
 </body>
 </html>
