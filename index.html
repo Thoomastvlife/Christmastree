@@ -52,7 +52,7 @@
         /* 圣诞树容器 - 正向旋转 */
         .tree-container {
             position: relative;
-            width: 300px; /* 加宽容器适配底部大半径 */
+            width: 300px;
             height: 350px;
             transform-style: preserve-3d;
             transform-origin: center center;
@@ -131,9 +131,10 @@
 
     <!-- 音乐控制 -->
     <button id="music-btn">🔊 關閉音樂</button>
-    <audio id="bg-music" loop>
-        <source src="https://cdn.freesound.org/previews/686/686091_12095518-lq.mp3" type="audio/mpeg">
-        你的瀏覽器不支援音樂播放
+    <!-- 核心修改：音频源改为 tree.mp3 -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="tree.mp3" type="audio/mpeg">
+        你的瀏覽器不支援音頻播放
     </audio>
 
     <!-- 圣诞树 -->
@@ -148,23 +149,34 @@
     </div>
 
     <script>
-        // 音乐控制
+        // 音乐控制（适配本地 tree.mp3）
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
         audio.volume = 0.4;
+        audio.preload = "auto"; // 预加载本地音乐
 
-        document.addEventListener('touchstart', () => {
+        // 同时监听点击/触摸，确保电脑/手机都能触发
+        document.addEventListener('click', playMusic);
+        document.addEventListener('touchstart', playMusic);
+
+        // 统一播放函数
+        function playMusic() {
             if (!isMusicOn) {
                 audio.play().then(() => {
                     isMusicOn = true;
                     musicBtn.textContent = "🔊 關閉音樂";
-                }).catch(() => {
-                    musicBtn.textContent = "🔇 播放音樂";
+                    // 移除重复监听
+                    document.removeEventListener('click', playMusic);
+                    document.removeEventListener('touchstart', playMusic);
+                }).catch((err) => {
+                    console.log("播放提示：", err);
+                    musicBtn.textContent = "🔇 點擊手動播放";
                 });
             }
-        });
+        }
 
+        // 音乐按钮兜底
         musicBtn.addEventListener('click', () => {
             if (isMusicOn) {
                 audio.pause();
@@ -178,30 +190,25 @@
             }
         });
 
-        // 生成上小下大的螺旋圣诞树（核心修改）
+        // 生成上小下大的螺旋圣诞树
         const tree = document.getElementById('tree');
-        const dotCount = 180; // 增加光点数量，让底部更饱满
+        const dotCount = 180;
         const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700'];
 
         for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            // 核心：半径规则反转 → 底部（i大）半径大，顶部（i小）半径小
-            const height = i * 2; // 垂直高度
-            // 半径公式：i越大（越靠下），radius越大 → 上小下大
-            const radius = i * 0.8; // 反转原公式，从 (dotCount-i)*0.7 改为 i*0.8
-            const angle = i * 0.25; // 螺旋密度
+            const height = i * 2;
+            const radius = i * 0.8;
+            const angle = i * 0.25;
             
-            // 计算X/Z轴位置（中心对称）
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
-            // 分配颜色
             dot.style.color = colors[Math.floor(Math.random() * colors.length)];
             dot.style.background = dot.style.color;
             
-            // 3D定位
             dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
             tree.appendChild(dot);
         }
