@@ -19,7 +19,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            perspective: 800px; /* 降低透视强度，避免倾斜 */
+            perspective: 800px;
             font-family: 'Microsoft JhengHei', sans-serif;
         }
 
@@ -49,26 +49,23 @@
             z-index: 999;
         }
 
-        /* 圣诞树容器 - 核心：固定旋转中心+转正 */
+        /* 圣诞树容器 - 正向旋转 */
         .tree-container {
             position: relative;
-            width: 250px;
+            width: 300px; /* 加宽容器适配底部大半径 */
             height: 350px;
             transform-style: preserve-3d;
-            /* 关键：旋转中心定位到容器正中心，消除倾斜 */
             transform-origin: center center;
-            /* 初始角度设为0，确保加载时正向 */
             animation: rotateTree 20s infinite linear;
             margin: 20px 0;
         }
 
-        /* 旋转动画：仅绕Y轴正向旋转，无偏移 */
         @keyframes rotateTree {
             0% { transform: rotateY(0deg); }
             100% { transform: rotateY(360deg); }
         }
 
-        /* 螺旋光带（核心：统一大小+居中） */
+        /* 螺旋光带 */
         .dot {
             position: absolute;
             width: 6px;
@@ -76,18 +73,16 @@
             border-radius: 50%;
             box-shadow: 0 0 8px 2px currentColor;
             opacity: 0.9;
-            /* 光点定位基准：容器正中心 */
             left: 50%;
             top: 0;
             transform: translateX(-50%);
         }
 
-        /* 树顶星星 - 精准居中转正 */
+        /* 树顶星星 - 精准居中 */
         .star {
             position: absolute;
             top: -20px;
             left: 50%;
-            /* 完全居中，无任何偏移 */
             transform: translateX(-50%) rotateY(0deg);
             color: #FFD700;
             font-size: 30px;
@@ -95,7 +90,7 @@
             z-index: 10;
         }
 
-        /* 文字区域 - 清晰居中 */
+        /* 文字区域 */
         .message {
             text-align: center;
             margin-top: 10px;
@@ -114,7 +109,7 @@
             letter-spacing: 1px;
         }
 
-        /* 雪花效果 - 流畅不遮挡 */
+        /* 雪花效果 */
         .snow {
             position: absolute;
             top: -10px;
@@ -141,7 +136,7 @@
         你的瀏覽器不支援音樂播放
     </audio>
 
-    <!-- 圣诞树（容器内直接包含星星，确保居中） -->
+    <!-- 圣诞树 -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
@@ -153,7 +148,7 @@
     </div>
 
     <script>
-        // 音乐控制（适配手机触摸）
+        // 音乐控制
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
@@ -183,29 +178,30 @@
             }
         });
 
-        // 生成螺旋圣诞树（核心：转正算法）
+        // 生成上小下大的螺旋圣诞树（核心修改）
         const tree = document.getElementById('tree');
-        const dotCount = 150;
-        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700']; // 红/绿/白/金
+        const dotCount = 180; // 增加光点数量，让底部更饱满
+        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700'];
 
         for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            // 螺旋算法（完全正向，无倾斜）
-            const height = i * 2.2; // 垂直高度（仅Y轴）
-            const radius = (dotCount - i) * 0.7; // 螺旋半径（随高度减小）
-            const angle = i * 0.25; // 旋转角度（仅绕Y轴）
+            // 核心：半径规则反转 → 底部（i大）半径大，顶部（i小）半径小
+            const height = i * 2; // 垂直高度
+            // 半径公式：i越大（越靠下），radius越大 → 上小下大
+            const radius = i * 0.8; // 反转原公式，从 (dotCount-i)*0.7 改为 i*0.8
+            const angle = i * 0.25; // 螺旋密度
             
-            // 计算X/Z轴位置（保证中心对称，正向显示）
+            // 计算X/Z轴位置（中心对称）
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
-            // 分配颜色+发光
+            // 分配颜色
             dot.style.color = colors[Math.floor(Math.random() * colors.length)];
             dot.style.background = dot.style.color;
             
-            // 3D定位（核心：基于容器中心，完全转正）
+            // 3D定位
             dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
             tree.appendChild(dot);
         }
