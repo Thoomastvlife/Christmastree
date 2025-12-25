@@ -38,7 +38,7 @@
             z-index: 999;
         }
 
-        /* 聖誕樹容器 - 原版旋轉動效 */
+        /* 聖誕樹容器 - 原版旋轉動效 + 點擊手勢 */
         .tree-container {
             position: relative;
             width: 300px;
@@ -47,6 +47,8 @@
             transform-origin: center center;
             animation: rotateTree 20s infinite linear;
             margin: 20px 0;
+            cursor: pointer; /* 滑鼠手勢 */
+            touch-action: manipulation; /* 手機觸控優化 */
         }
 
         @keyframes rotateTree {
@@ -129,6 +131,82 @@
             z-index: 998;
             text-shadow: 0 0 2px #666;
         }
+
+        /* 聖誕卡片遮罩層 */
+        .card-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 聖誕卡片本體 */
+        .christmas-card {
+            width: clamp(280px, 80vw, 450px);
+            background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 30px 5px rgba(255, 215, 0, 0.8);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        /* 卡片打開動畫 */
+        .card-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .card-overlay.active .christmas-card {
+            transform: scale(1);
+        }
+
+        /* 卡片關閉按鈕 */
+        .close-card {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 卡片內容樣式 */
+        .card-title {
+            font-size: 24px;
+            color: #D63031;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #fff;
+        }
+        .card-content {
+            font-size: 18px;
+            color: #2D3436;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .card-footer {
+            font-size: 14px;
+            color: #636E72;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -139,7 +217,7 @@
         你的瀏覽器不支援音頻播放
     </audio>
 
-    <!-- 聖誕樹容器（原版結構） -->
+    <!-- 聖誕樹容器（原版結構 + 點擊事件） -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
@@ -152,6 +230,16 @@
 
     <!-- 版權資訊 -->
     <div class="copyright">© 2025 YT集團早安咖啡, all rights reserved</div>
+
+    <!-- 聖誕卡片遮罩層 -->
+    <div class="card-overlay" id="cardOverlay">
+        <div class="christmas-card">
+            <button class="close-card" id="closeCard">×</button>
+            <h2 class="card-title">🎄 聖誕快樂 🎄</h2>
+            <p class="card-content">親愛的夥伴：<br><br>感謝你一路以來的陪伴與付出，在這個溫馨的聖誕節，YT集團早安咖啡祝你和你的家人聖誕快樂、平安喜樂，新的一年萬事順利、幸福滿滿！</p>
+            <p class="card-footer">—— YT集團早安咖啡 敬上</p>
+        </div>
+    </div>
 
     <script>
         // 音樂控制（原版邏輯+兼容優化）
@@ -230,6 +318,41 @@
             setTimeout(() => snow.remove(), 7000);
         }
         setInterval(createSnow, 200); // 原版生成頻率
+
+        // 聖誕卡片交互邏輯
+        const treeContainer = document.getElementById('tree');
+        const cardOverlay = document.getElementById('cardOverlay');
+        const closeCard = document.getElementById('closeCard');
+
+        // 點擊聖誕樹打開卡片
+        treeContainer.addEventListener('click', (e) => {
+            e.stopPropagation(); // 防止觸發音樂播放的全域事件
+            cardOverlay.classList.add('active');
+            // 卡片打開時暫停聖誕樹旋轉
+            treeContainer.style.animationPlayState = 'paused';
+        });
+
+        // 點擊關閉按鈕關閉卡片
+        closeCard.addEventListener('click', () => {
+            cardOverlay.classList.remove('active');
+            // 恢復聖誕樹旋轉
+            treeContainer.style.animationPlayState = 'running';
+        });
+
+        // 點擊遮罩層關閉卡片
+        cardOverlay.addEventListener('click', (e) => {
+            if (e.target === cardOverlay) {
+                cardOverlay.classList.remove('active');
+                treeContainer.style.animationPlayState = 'running';
+            }
+        });
+
+        // 手機端觸摸支援
+        treeContainer.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            cardOverlay.classList.add('active');
+            treeContainer.style.animationPlayState = 'paused';
+        });
     </script>
 </body>
 </html>
