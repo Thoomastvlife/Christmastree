@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>聖誕快樂 - 螺旋聖誕樹</title>
     <style>
-        /* 全局重置+手機适配（原版基礎樣式） */
+        /* 全局重置+手機适配 */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +23,7 @@
             font-family: 'Microsoft JhengHei', sans-serif;
         }
 
-        /* 音樂按钮（原版樣式） */
+        /* 音樂按钮 */
         #music-btn {
             position: fixed;
             top: 10px;
@@ -38,7 +38,7 @@
             z-index: 999;
         }
 
-        /* 聖誕樹容器 - 原版旋轉動效 + 點擊手勢 */
+        /* 聖誕樹容器 */
         .tree-container {
             position: relative;
             width: 300px;
@@ -47,8 +47,8 @@
             transform-origin: center center;
             animation: rotateTree 20s infinite linear;
             margin: 20px 0;
-            cursor: pointer; /* 滑鼠手勢 */
-            touch-action: manipulation; /* 手機觸控優化 */
+            cursor: pointer;
+            touch-action: manipulation;
         }
 
         @keyframes rotateTree {
@@ -56,7 +56,7 @@
             100% { transform: rotateY(360deg); }
         }
 
-        /* 螺旋光帶 - 原版樣式 */
+        /* 螺旋光帶 */
         .dot {
             position: absolute;
             width: 6px;
@@ -69,7 +69,7 @@
             transform: translateX(-50%);
         }
 
-        /* 樹顶星星 - 原版樣式 */
+        /* 樹顶星星 */
         .star {
             position: absolute;
             top: -20px;
@@ -81,7 +81,7 @@
             z-index: 10;
         }
 
-        /* 文字區域 - 原版樣式 */
+        /* 文字區域 */
         .message {
             text-align: center;
             margin-top: 10px;
@@ -100,7 +100,7 @@
             letter-spacing: 1px;
         }
 
-        /* 雪花效果 - 修復手機端卡住問題 */
+        /* 雪花效果 */
         .snow {
             position: absolute;
             top: -10px;
@@ -109,15 +109,15 @@
             opacity: 0.7;
             pointer-events: none;
             animation: fall 5s linear forwards;
-            transform: translateZ(0); /* 手機端硬件加速 */
+            transform: translateZ(0);
             z-index: 1;
         }
 
         @keyframes fall {
-            to { transform: translateY(100vh); } /* 替換vh解析問題 */
+            to { transform: translateY(100vh); }
         }
 
-        /* 版權資訊樣式 */
+        /* 版權資訊 */
         .copyright {
             position: fixed;
             bottom: 10px;
@@ -147,23 +147,22 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            padding: 20px; /* 防止卡片撐出螢幕 */
+            padding: 15px; /* 手機端縮小內邊距，擴大卡片空間 */
         }
 
-        /* 聖誕卡片本體 - 核心優化：自適應高度 */
+        /* 聖誕卡片本體 - 手機端專屬優化 */
         .christmas-card {
-            width: clamp(280px, 80vw, 480px); /* 稍微加寬，容納更多文字 */
+            width: clamp(260px, 90vw, 400px); /* 手機端更寬，容納更多文字 */
             background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4);
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px 15px; /* 減少內邊距，節省高度 */
             text-align: center;
             box-shadow: 0 0 30px 5px rgba(255, 215, 0, 0.8);
             transform: scale(0.8);
             transition: transform 0.3s ease;
             position: relative;
-            /* 關鍵：自適應高度，最小高度保證布局 */
             height: auto;
-            min-height: 280px;
+            min-height: 250px; /* 降低最小高度，適配手機 */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -181,52 +180,52 @@
         /* 卡片關閉按鈕 */
         .close-card {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background: rgba(0,0,0,0.7);
             color: #fff;
             border: none;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10; /* 確保按鈕不被遮擋 */
+            z-index: 10;
         }
 
-        /* 卡片內容樣式 */
+        /* 卡片標題 - 縮小字體 */
         .card-title {
-            font-size: 24px;
+            font-size: 20px; /* 手機端縮小標題字體 */
             color: #D63031;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-shadow: 0 0 5px #fff;
         }
 
-        /* 文本輪播容器 - 徹底優化：移除固定高度，改用flex */
+        /* 文本輪播容器 - 手機端高度優化 */
         .card-content-wrapper {
-            flex: 1; /* 佔據卡片剩餘空間 */
+            flex: 1;
             overflow: hidden;
             position: relative;
-            margin: 10px 0 20px 0;
-            min-height: 140px; /* 保證最小高度，適配多一行文字 */
+            margin: 8px 0 15px 0;
+            min-height: 120px; /* 降低最小高度，避免擠壓 */
         }
 
-        /* 輪播文本項 - 優化定位和行高 */
+        /* 輪播文本項 - 手機端字體縮小 */
         .card-content-item {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            font-size: 17px; /* 稍微縮小字體，減少高度壓力 */
+            font-size: 15px; /* 大幅縮小字體，確保所有文字顯示 */
             color: #2D3436;
-            line-height: 1.7; /* 優化行高，提升可讀性 */
+            line-height: 1.6; /* 適當行高，避免擠壓 */
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
             transition: all 0.5s ease;
-            padding: 0 5px;
+            padding: 0 3px;
         }
 
         /* 當前顯示的文本 */
@@ -235,35 +234,36 @@
             transform: translateY(0);
         }
 
+        /* 卡片底部署名 - 縮小字體 */
         .card-footer {
-            font-size: 14px;
+            font-size: 12px; /* 手機端縮小署名字體 */
             color: #636E72;
             font-weight: bold;
-            margin-top: auto; /* 固定在卡片底部 */
-            padding-top: 10px;
+            margin-top: auto;
+            padding-top: 8px;
         }
     </style>
 </head>
 <body>
-    <!-- 音樂控制 - 修復閉合標籤 -->
+    <!-- 音樂控制 -->
     <button id="music-btn">🔇 播放音樂</button>
     <audio id="bg-music" loop preload="auto">
         <source src="tree.mp3" type="audio/mpeg">
         你的瀏覽器不支援音頻播放
     </audio>
 
-    <!-- 聖誕樹容器（原版結構 + 點擊事件） -->
+    <!-- 聖誕樹容器 -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
 
-    <!-- 文字（原版內容） -->
+    <!-- 文字 -->
     <div class="message">
         <h1>Merry Christmas</h1>
         <p>祝你聖誕快樂，幸福永遠</p>
     </div>
 
-    <!-- 版權資訊（個人化） -->
+    <!-- 版權資訊 -->
     <div class="copyright">© 2025 YT集團早安咖啡, all rights reserved</div>
 
     <!-- 聖誕卡片遮罩層 -->
@@ -273,18 +273,22 @@
             <h2 class="card-title">🎄 聖誕快樂 🎄</h2>
             <!-- 文本輪播容器 -->
             <div class="card-content-wrapper" id="cardContentWrapper">
-                <!-- 多段交替文本（測試多一行字的場景） -->
+                <!-- 文本調整換行，避免過長 -->
                 <div class="card-content-item active">
-                    親愛的朋友：<br>感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT集團早安咖啡祝你和你的家人聖誕快樂、平安喜樂，新的一年萬事如意！
+                    親愛的朋友：<br>
+                    感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT集團早安咖啡祝你和你的家人聖誕快樂、平安喜樂，新的一年萬事如意！
                 </div>
                 <div class="card-content-item">
-                    每一位咖啡同好：<br>聖誕鐘聲敲響，溫暖與歡樂相伴！願這份節日的美好，帶給你滿滿的能量，新的一年事事順心、咖啡常溫，每天都有好心情！
+                    每一位咖啡同好：<br>
+                    聖誕鐘聲敲響，溫暖與歡樂相伴！願這份節日的美好，帶給你滿滿的能量，新的一年事事順心、咖啡常溫，每天都有好心情！
                 </div>
                 <div class="card-content-item">
-                    每一位珍惜相遇的你：<br>感恩遇見，感恩喜愛！聖誕佳節，願星光為你引路，溫暖圍繞身邊，YT集團早安咖啡與你共赴新程，一起品嚐生活的美好！
+                    每一位珍惜相遇的你：<br>
+                    感恩遇見，感恩喜愛！聖誕佳節，願星光為你引路，溫暖圍繞身邊，YT集團早安咖啡與你共赴新程，一起品嚐生活的美好！
                 </div>
                 <div class="card-content-item">
-                    親愛的夥伴：<br>聖誕的歡樂，是溫暖的相聚，是美好的祝福！YT集團早安咖啡祝你聖誕圓滿，新年可期，幸福常伴，笑口常開！
+                    親愛的夥伴：<br>
+                    聖誕的歡樂，是溫暖的相聚，是美好的祝福！YT集團早安咖啡祝你聖誕圓滿，新年可期，幸福常伴，笑口常開！
                 </div>
             </div>
             <p class="card-footer">—— YT集團早安咖啡 敬上</p>
@@ -292,119 +296,95 @@
     </div>
 
     <script>
-        // 音樂控制（優化邏輯，避免重複綁定）
+        // 音樂控制
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
-        let musicInitiated = false; // 新增標記，避免重複播放
+        let musicInitiated = false;
         audio.volume = 0.4;
 
-        // 音樂播放函數（優化）
         function playMusic() {
             if (!isMusicOn && !musicInitiated) {
-                musicInitiated = true; // 標記已嘗試播放
+                musicInitiated = true;
                 audio.play().then(() => {
                     isMusicOn = true;
                     musicBtn.textContent = "🔊 關閉音樂";
                 }).catch((err) => {
                     console.log("播放提示：", err);
                     musicBtn.textContent = "🔇 點擊手動播放";
-                    musicInitiated = false; // 重置標記，允許再次嘗試
+                    musicInitiated = false;
                 });
             }
         }
 
-        // 全域點擊/觸摸播放音樂（只綁定一次）
         document.addEventListener('click', playMusic, { once: true });
         document.addEventListener('touchstart', playMusic, { once: true });
 
-        // 音樂按鈕控制
         musicBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // 防止觸發全域播放
+            e.stopPropagation();
             if (isMusicOn) {
                 audio.pause();
                 isMusicOn = false;
                 musicBtn.textContent = "🔇 播放音樂";
             } else {
-                playMusic(); // 調用統一的播放函數
+                playMusic();
             }
         });
 
-        // 生成原版螺旋聖誕樹（還原最初參數）
+        // 生成聖誕樹光點
         const tree = document.getElementById('tree');
-        const dotCount = 180; // 原版數量
-        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700']; // 原版顏色
-
-        // 優化：分批生成光點，避免一次性渲染卡住
+        const dotCount = 180;
+        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700'];
         let dotIndex = 0;
         function createDotBatch() {
-            // 每次生成10個光點，減少主執行緒阻塞
             for (let i = 0; i < 10 && dotIndex < dotCount; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'dot';
-                
                 const height = dotIndex * 2;
                 const radius = dotIndex * 0.8;
                 const angle = dotIndex * 0.25;
-                
                 const x = Math.cos(angle) * radius;
                 const z = Math.sin(angle) * radius;
-                
                 dot.style.color = colors[Math.floor(Math.random() * colors.length)];
                 dot.style.background = dot.style.color;
-                
                 dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
                 tree.appendChild(dot);
-                
                 dotIndex++;
             }
-            
-            if (dotIndex < dotCount) {
-                // 下一幀繼續生成，避免卡住
-                requestAnimationFrame(createDotBatch);
-            }
+            if (dotIndex < dotCount) requestAnimationFrame(createDotBatch);
         }
-
-        // 啟動分批生成光點
         requestAnimationFrame(createDotBatch);
 
-        // 雪花生成（優化：限制同時生成數量）
+        // 生成雪花
         let snowCount = 0;
-        const MAX_SNOW = 30; // 最多同時顯示30個雪花
+        const MAX_SNOW = 30;
         function createSnow() {
             if (snowCount >= MAX_SNOW) return;
-            
             const snow = document.createElement('div');
             snow.className = 'snow';
             snow.textContent = '❄';
             snow.style.left = Math.random() * 100 + 'vw';
             snow.style.animationDuration = Math.random() * 4 + 3 + 's';
-            
             document.body.appendChild(snow);
             snowCount++;
-            
-            // 雪花消失後計數減少
             setTimeout(() => {
                 snow.remove();
                 snowCount--;
             }, 7000);
         }
-
-        // 優化雪花生成定時器
         setInterval(createSnow, 200);
 
-        // 聖誕卡片交互邏輯（徹底優化定時器）
+        // 卡片交互
         const treeContainer = document.getElementById('tree');
         const cardOverlay = document.getElementById('cardOverlay');
         const closeCard = document.getElementById('closeCard');
-        const contentWrapper = document.getElementById('cardContentWrapper');
-        const contentItems = contentWrapper.querySelectorAll('.card-content-item');
+        const contentItems = document.querySelectorAll('.card-content-item');
         let currentIndex = 0;
         let carouselTimer = null;
+        let isCardOpen = false;
 
-        // 文本輪播函數（優化：防止重複定時器）
         function startTextCarousel() {
-            stopTextCarousel(); // 先停止舊的定時器
+            stopTextCarousel();
             carouselTimer = setInterval(() => {
                 contentItems[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % contentItems.length;
@@ -412,31 +392,22 @@
             }, 3000);
         }
 
-        // 停止文本輪播
         function stopTextCarousel() {
-            if (carouselTimer) {
-                clearInterval(carouselTimer);
-                carouselTimer = null;
-            }
+            if (carouselTimer) clearInterval(carouselTimer);
+            carouselTimer = null;
             currentIndex = 0;
-            contentItems.forEach((item, idx) => {
-                item.classList.toggle('active', idx === 0);
-            });
+            contentItems.forEach((item, idx) => item.classList.toggle('active', idx === 0));
         }
 
-        // 點擊聖誕樹打開卡片（優化：防止重複點擊）
-        let isCardOpen = false;
         treeContainer.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (isCardOpen) return; // 已打開則不重複執行
-            
+            if (isCardOpen) return;
             isCardOpen = true;
             cardOverlay.classList.add('active');
             treeContainer.style.animationPlayState = 'paused';
             startTextCarousel();
         });
 
-        // 關閉卡片通用函數
         function closeCardHandler() {
             isCardOpen = false;
             cardOverlay.classList.remove('active');
@@ -444,28 +415,20 @@
             stopTextCarousel();
         }
 
-        // 點擊關閉按鈕
         closeCard.addEventListener('click', closeCardHandler);
-
-        // 點擊遮罩層
         cardOverlay.addEventListener('click', (e) => {
-            if (e.target === cardOverlay) {
-                closeCardHandler();
-            }
+            if (e.target === cardOverlay) closeCardHandler();
         });
 
-        // 手機端觸摸支援
         treeContainer.addEventListener('touchstart', (e) => {
             e.stopPropagation();
             if (isCardOpen) return;
-            
             isCardOpen = true;
             cardOverlay.classList.add('active');
             treeContainer.style.animationPlayState = 'paused';
             startTextCarousel();
         });
 
-        // 頁面卸載時清理資源
         window.addEventListener('beforeunload', () => {
             stopTextCarousel();
             audio.pause();
