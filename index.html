@@ -147,11 +147,12 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            padding: 20px; /* 防止卡片撐出螢幕 */
         }
 
-        /* 聖誕卡片本體 */
+        /* 聖誕卡片本體 - 核心優化：自適應高度 */
         .christmas-card {
-            width: clamp(280px, 80vw, 450px);
+            width: clamp(280px, 80vw, 480px); /* 稍微加寬，容納更多文字 */
             background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4);
             border-radius: 15px;
             padding: 25px;
@@ -160,6 +161,12 @@
             transform: scale(0.8);
             transition: transform 0.3s ease;
             position: relative;
+            /* 關鍵：自適應高度，最小高度保證布局 */
+            height: auto;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         /* 卡片打開動畫 */
@@ -187,6 +194,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 10; /* 確保按鈕不被遮擋 */
         }
 
         /* 卡片內容樣式 */
@@ -196,39 +204,43 @@
             margin-bottom: 15px;
             text-shadow: 0 0 5px #fff;
         }
-        /* 文本輪播容器 - 優化高度計算 */
+
+        /* 文本輪播容器 - 徹底優化：移除固定高度，改用flex */
         .card-content-wrapper {
-            height: auto;
-            min-height: 120px; /* 最小高度，適配不同文本 */
-            max-height: 150px; /* 最大高度，防止過長 */
+            flex: 1; /* 佔據卡片剩餘空間 */
             overflow: hidden;
             position: relative;
-            margin-bottom: 20px;
-            padding: 0 10px;
+            margin: 10px 0 20px 0;
+            min-height: 140px; /* 保證最小高度，適配多一行文字 */
         }
-        /* 輪播文本項 */
+
+        /* 輪播文本項 - 優化定位和行高 */
         .card-content-item {
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
+            left: 0;
             width: 100%;
-            font-size: 18px;
+            font-size: 17px; /* 稍微縮小字體，減少高度壓力 */
             color: #2D3436;
-            line-height: 1.6;
+            line-height: 1.7; /* 優化行高，提升可讀性 */
             opacity: 0;
+            transform: translateY(10px);
             transition: all 0.5s ease;
             padding: 0 5px;
         }
+
         /* 當前顯示的文本 */
         .card-content-item.active {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateY(0);
         }
+
         .card-footer {
             font-size: 14px;
             color: #636E72;
             font-weight: bold;
+            margin-top: auto; /* 固定在卡片底部 */
+            padding-top: 10px;
         }
     </style>
 </head>
@@ -261,21 +273,21 @@
             <h2 class="card-title">🎄 聖誕快樂 🎄</h2>
             <!-- 文本輪播容器 -->
             <div class="card-content-wrapper" id="cardContentWrapper">
-                <!-- 多段交替文本（個人化） -->
+                <!-- 多段交替文本（測試多一行字的場景） -->
                 <div class="card-content-item active">
-                    親愛的朋友：<br>感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT個人早安咖啡祝你和你的家人聖誕快樂、平安喜樂！
+                    親愛的朋友：<br>感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT集團早安咖啡祝你和你的家人聖誕快樂、平安喜樂，新的一年萬事如意！
                 </div>
                 <div class="card-content-item">
-                    每一位咖啡同好：<br>聖誕鐘聲敲響，溫暖與歡樂相伴！願這份節日的美好，帶給你滿滿的能量，新的一年事事順心、咖啡常溫！
+                    每一位咖啡同好：<br>聖誕鐘聲敲響，溫暖與歡樂相伴！願這份節日的美好，帶給你滿滿的能量，新的一年事事順心、咖啡常溫，每天都有好心情！
                 </div>
                 <div class="card-content-item">
-                    每一位珍惜相遇的：<br>感恩遇見，感恩喜愛！聖誕佳節，願星光為你引路，溫暖圍繞身邊，YT個人早安咖啡與你共赴新程！
+                    每一位珍惜相遇的你：<br>感恩遇見，感恩喜愛！聖誕佳節，願星光為你引路，溫暖圍繞身邊，YT集團早安咖啡與你共赴新程，一起品嚐生活的美好！
                 </div>
                 <div class="card-content-item">
-                    親愛的夥伴：<br>聖誕的歡樂，是溫暖的相聚，是美好的祝福！YT個人早安咖啡祝你聖誕圓滿，新年可期，幸福常伴！
+                    親愛的夥伴：<br>聖誕的歡樂，是溫暖的相聚，是美好的祝福！YT集團早安咖啡祝你聖誕圓滿，新年可期，幸福常伴，笑口常開！
                 </div>
             </div>
-            <p class="card-footer">—— YT個人早安咖啡 敬上</p>
+            <p class="card-footer">—— YT集團早安咖啡 敬上</p>
         </div>
     </div>
 
