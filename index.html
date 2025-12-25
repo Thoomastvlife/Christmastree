@@ -196,11 +196,30 @@
             margin-bottom: 15px;
             text-shadow: 0 0 5px #fff;
         }
-        .card-content {
+        /* 文本輪播容器 */
+        .card-content-wrapper {
+            height: 120px; /* 固定高度，避免卡片跳動 */
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        /* 輪播文本項 */
+        .card-content-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             font-size: 18px;
             color: #2D3436;
             line-height: 1.6;
-            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        /* 當前顯示的文本 */
+        .card-content-item.active {
+            opacity: 1;
+            transform: translateY(0);
         }
         .card-footer {
             font-size: 14px;
@@ -215,7 +234,7 @@
     <audio id="bg-music" loop preload="auto">
         <source src="tree.mp3" type="audio/mpeg">
         你的瀏覽器不支援音頻播放
-    </audio>
+    
 
     <!-- 聖誕樹容器（原版結構 + 點擊事件） -->
     <div class="tree-container" id="tree">
@@ -228,16 +247,31 @@
         <p>祝你聖誕快樂，幸福永遠</p>
     </div>
 
-    <!-- 版權資訊 -->
-    <div class="copyright">© 2025 YT集團早安咖啡, all rights reserved</div>
+    <!-- 版權資訊（修改為個人） -->
+    <div class="copyright">© 2025 YT個人早安咖啡, all rights reserved</div>
 
     <!-- 聖誕卡片遮罩層 -->
     <div class="card-overlay" id="cardOverlay">
         <div class="christmas-card">
             <button class="close-card" id="closeCard">×</button>
             <h2 class="card-title">🎄 聖誕快樂 🎄</h2>
-            <p class="card-content">親愛的夥伴：<br><br>感謝你一路以來的陪伴與付出，在這個溫馨的聖誕節，YT集團早安咖啡祝你和你的家人聖誕快樂、平安喜樂，新的一年萬事順利、幸福滿滿！</p>
-            <p class="card-footer">—— YT集團早安咖啡 敬上</p>
+            <!-- 文本輪播容器 -->
+            <div class="card-content-wrapper" id="cardContentWrapper">
+                <!-- 多段交替文本（修改為個人視角） -->
+                <div class="card-content-item active">
+                    親愛的朋友：<br><br>感謝你一路以來的陪伴與支持，在這個溫馨的聖誕節，YT個人早安咖啡祝你和你的家人聖誕快樂、平安喜樂！
+                </div>
+                <div class="card-content-item">
+                    每一位咖啡同好：<br><br>聖誕鐘聲敲響，溫暖與歡樂相伴！願這份節日的美好，帶給你滿滿的能量，新的一年事事順心、咖啡常溫！
+                </div>
+                <div class="card-content-item">
+                    每一位珍惜相遇的你：<br><br>感恩遇見，感恩喜愛！聖誕佳節，願星光為你引路，溫暖圍繞身邊，YT個人早安咖啡與你共赴新程！
+                </div>
+                <div class="card-content-item">
+                    親愛的夥伴：<br><br>聖誕的歡樂，是溫暖的相聚，是美好的祝福！YT個人早安咖啡祝你聖誕圓滿，新年可期，幸福常伴！
+                </div>
+            </div>
+            <p class="card-footer">—— YT個人早安咖啡 敬上</p>
         </div>
     </div>
 
@@ -323,6 +357,39 @@
         const treeContainer = document.getElementById('tree');
         const cardOverlay = document.getElementById('cardOverlay');
         const closeCard = document.getElementById('closeCard');
+        // 文本輪播相關
+        const contentWrapper = document.getElementById('cardContentWrapper');
+        const contentItems = contentWrapper.querySelectorAll('.card-content-item');
+        let currentIndex = 0;
+        let carouselTimer = null;
+
+        // 文本輪播函數
+        function startTextCarousel() {
+            // 清除之前的定時器
+            if (carouselTimer) clearInterval(carouselTimer);
+            // 每3秒切換一次文本
+            carouselTimer = setInterval(() => {
+                // 隱藏當前文本
+                contentItems[currentIndex].classList.remove('active');
+                // 計算下一索引
+                currentIndex = (currentIndex + 1) % contentItems.length;
+                // 顯示下一文本
+                contentItems[currentIndex].classList.add('active');
+            }, 3000);
+        }
+
+        // 停止文本輪播
+        function stopTextCarousel() {
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
+            // 重置當前索引
+            currentIndex = 0;
+            contentItems.forEach((item, idx) => {
+                item.classList.toggle('active', idx === 0);
+            });
+        }
 
         // 點擊聖誕樹打開卡片
         treeContainer.addEventListener('click', (e) => {
@@ -330,6 +397,8 @@
             cardOverlay.classList.add('active');
             // 卡片打開時暫停聖誕樹旋轉
             treeContainer.style.animationPlayState = 'paused';
+            // 啟動文本輪播
+            startTextCarousel();
         });
 
         // 點擊關閉按鈕關閉卡片
@@ -337,6 +406,8 @@
             cardOverlay.classList.remove('active');
             // 恢復聖誕樹旋轉
             treeContainer.style.animationPlayState = 'running';
+            // 停止文本輪播並重置
+            stopTextCarousel();
         });
 
         // 點擊遮罩層關閉卡片
@@ -344,6 +415,7 @@
             if (e.target === cardOverlay) {
                 cardOverlay.classList.remove('active');
                 treeContainer.style.animationPlayState = 'running';
+                stopTextCarousel();
             }
         });
 
@@ -352,7 +424,11 @@
             e.stopPropagation();
             cardOverlay.classList.add('active');
             treeContainer.style.animationPlayState = 'paused';
+            startTextCarousel();
         });
+
+        // 頁面卸載時清除定時器
+        window.addEventListener('unload', stopTextCarousel);
     </script>
 </body>
 </html>
