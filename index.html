@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>聖誕快樂 - 螺旋聖誕樹</title>
     <style>
-        /* 全局重置+手機適配 */
+        /* 全局重置+手機适配（原版基礎樣式） */
         * {
             margin: 0;
             padding: 0;
@@ -21,15 +21,9 @@
             height: 100vh;
             perspective: 800px;
             font-family: 'Microsoft JhengHei', sans-serif;
-            touch-action: manipulation;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards;
-            transform: translateZ(0);
-            /* 手機端關閉彈性滾動，避免干擾動畫 */
-            overscroll-behavior: none;
         }
 
-        /* 音樂按鈕 */
+        /* 音樂按钮（原版樣式） */
         #music-btn {
             position: fixed;
             top: 10px;
@@ -40,129 +34,85 @@
             padding: 6px 12px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: clamp(12px, 2vw, 14px);
+            font-size: 14px;
             z-index: 999;
-            transition: all 0.3s ease;
-        }
-        #music-btn:hover {
-            background: rgba(255, 215, 0, 0.2);
         }
 
-        /* 聖誕樹容器 */
+        /* 聖誕樹容器 - 原版旋轉動效 */
         .tree-container {
             position: relative;
-            width: clamp(200px, 50vw, 300px);
-            height: clamp(250px, 60vw, 350px);
+            width: 300px;
+            height: 350px;
             transform-style: preserve-3d;
             transform-origin: center center;
-            transform: translateZ(0);
-            will-change: transform;
-            backface-visibility: hidden;
-            animation: rotateTree 25s infinite linear;
+            animation: rotateTree 20s infinite linear;
             margin: 20px 0;
         }
 
         @keyframes rotateTree {
-            0% { transform: rotateY(0deg) translateZ(0); }
-            100% { transform: rotateY(360deg) translateZ(0); }
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
         }
 
-        /* 螺旋光帶 */
+        /* 螺旋光帶 - 原版樣式 */
         .dot {
             position: absolute;
-            width: clamp(4px, 1vw, 6px);
-            height: clamp(4px, 1vw, 6px);
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            box-shadow: 0 0 clamp(5px, 1.5vw, 7px) clamp(1px, 0.3vw, 1.5px) currentColor;
-            opacity: 0.95;
+            box-shadow: 0 0 8px 2px currentColor;
+            opacity: 0.9;
             left: 50%;
             top: 0;
-            transform: translateX(-50%) translateZ(0);
-            will-change: transform;
-            backface-visibility: hidden;
-            transition: none;
+            transform: translateX(-50%);
         }
 
-        /* 樹頂星星 */
+        /* 樹顶星星 - 原版樣式 */
         .star {
             position: absolute;
             top: -20px;
             left: 50%;
-            transform: translateX(-50%) rotateY(0deg) translateZ(0);
+            transform: translateX(-50%) rotateY(0deg);
             color: #FFD700;
-            font-size: clamp(24px, 5vw, 30px);
-            text-shadow: 0 0 clamp(8px, 2vw, 10px) #FFD700;
+            font-size: 30px;
+            text-shadow: 0 0 10px #FFD700;
             z-index: 10;
-            animation: twinkle 2s infinite alternate;
-            will-change: opacity, text-shadow;
         }
 
-        @keyframes twinkle {
-            from { opacity: 0.8; }
-            to { opacity: 1; text-shadow: 0 0 15px #FFD700; }
-        }
-
-        /* 文字區域 */
+        /* 文字區域 - 原版樣式 */
         .message {
             text-align: center;
             margin-top: 10px;
             pointer-events: none;
-            z-index: 10;
         }
         .message h1 {
-            font-size: clamp(1.5em, 5vw, 2em);
+            font-size: 2em;
             color: #FF4D4D;
-            text-shadow: 0 0 clamp(6px, 2vw, 8px) #FF4D4D;
+            text-shadow: 0 0 8px #FF4D4D;
             margin-bottom: 5px;
-            animation: pulse 3s infinite alternate;
         }
         .message p {
-            font-size: clamp(0.8em, 3vw, 1em);
+            font-size: 1em;
             color: #fff;
-            text-shadow: 0 0 clamp(4px, 1.5vw, 6px) #fff;
+            text-shadow: 0 0 6px #fff;
             letter-spacing: 1px;
         }
 
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-
-        /* 雪花效果 - 手機端核心修復 */
+        /* 雪花效果 - 修復手機端卡住問題 */
         .snow {
             position: absolute;
             top: -10px;
             color: #fff;
-            font-size: clamp(10px, 2vw, 12px);
+            font-size: 12px;
             opacity: 0.7;
             pointer-events: none;
-            /* 1. 移除多動畫疊加，改用單一複合動畫 */
-            animation: snowFall 6s linear forwards;
-            /* 2. 手機端強制硬件加速 */
-            transform: translateZ(0);
-            will-change: transform, opacity;
-            /* 3. 提升z-index，避免被遮擋 */
+            animation: fall 5s linear forwards;
+            transform: translateZ(0); /* 手機端硬件加速 */
             z-index: 1;
         }
 
-        /* 修復手機端雪花下落動畫 - 替換vh為固定值+螢幕高度適配 */
-        @keyframes snowFall {
-            0% { 
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0.7;
-            }
-            90% {
-                opacity: 0.5;
-            }
-            100% { 
-                /* 用100%替代110vh，解決手機vh解析問題 */
-                transform: translateY(100vh) translateX(10px) rotate(10deg);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
+        @keyframes fall {
+            to { transform: translateY(100vh); } /* 替換vh解析問題 */
         }
     </style>
 </head>
@@ -174,166 +124,94 @@
         你的瀏覽器不支援音頻播放
     </audio>
 
-    <!-- 聖誕樹 -->
+    <!-- 聖誕樹容器（原版結構） -->
     <div class="tree-container" id="tree">
         <div class="star">★</div>
     </div>
 
-    <!-- 文字 -->
+    <!-- 文字（原版內容） -->
     <div class="message">
         <h1>Merry Christmas</h1>
         <p>祝你聖誕快樂，幸福永遠</p>
     </div>
 
     <script>
-        // 音樂控制（保留）
+        // 音樂控制（原版邏輯+兼容優化）
         const audio = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         let isMusicOn = false;
-        let musicInitiated = false;
         audio.volume = 0.4;
 
+        // 全域點擊/觸摸播放音樂
+        document.addEventListener('click', playMusic);
+        document.addEventListener('touchstart', playMusic);
+
         function playMusic() {
-            if (musicInitiated) return;
-            musicInitiated = true;
-            
-            audio.play().then(() => {
-                isMusicOn = true;
-                musicBtn.textContent = "🔊 關閉音樂";
-            }).catch((err) => {
-                console.log("音頻播放提示：", err);
-                musicBtn.textContent = "🔇 點擊手動播放";
-                musicInitiated = false;
-            });
-        }
-
-        document.addEventListener('click', initMusic);
-        document.addEventListener('touchstart', initMusic);
-
-        function initMusic() {
-            if (!isMusicOn && !musicInitiated) {
-                playMusic();
+            if (!isMusicOn) {
+                audio.play().then(() => {
+                    isMusicOn = true;
+                    musicBtn.textContent = "🔊 關閉音樂";
+                    document.removeEventListener('click', playMusic);
+                    document.removeEventListener('touchstart', playMusic);
+                }).catch((err) => {
+                    console.log("播放提示：", err);
+                    musicBtn.textContent = "🔇 點擊手動播放";
+                });
             }
         }
 
-        musicBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        // 音樂按鈕控制
+        musicBtn.addEventListener('click', () => {
             if (isMusicOn) {
                 audio.pause();
                 isMusicOn = false;
                 musicBtn.textContent = "🔇 播放音樂";
             } else {
-                playMusic();
+                audio.play().then(() => {
+                    isMusicOn = true;
+                    musicBtn.textContent = "🔊 關閉音樂";
+                });
             }
         });
 
-        // 生成螺旋聖誕樹（保留）
+        // 生成原版螺旋聖誕樹（還原最初參數）
         const tree = document.getElementById('tree');
-        const dotCount = 220;
-        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700', '#00BFFF'];
+        const dotCount = 180; // 原版數量
+        const colors = ['#FF4D4D', '#00FF00', '#FFFFFF', '#FFD700']; // 原版顏色
 
         for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            const progress = i / dotCount;
-            const height = progress * 380;
-            const radius = progress * 120;
-            const angle = i * 0.28;
+            // 原版坐標計算公式
+            const height = i * 2;
+            const radius = i * 0.8;
+            const angle = i * 0.25;
             
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
-            const colorIndex = Math.floor((i / dotCount) * colors.length);
-            dot.style.color = colors[colorIndex % colors.length];
+            // 原版隨機顏色
+            dot.style.color = colors[Math.floor(Math.random() * colors.length)];
             dot.style.background = dot.style.color;
             
-            dot.style.transform = `translate3d(${x.toFixed(2)}px, ${height.toFixed(2)}px, ${z.toFixed(2)}px)`;
-            
+            // 原版3D變換
+            dot.style.transform = `translate3d(${x}px, ${height}px, ${z}px)`;
             tree.appendChild(dot);
         }
 
-        // 雪花生成 - 手機端性能優化
-        let snowTimer = null;
-        // 手機端減少雪花數量和生成頻率
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const MAX_SNOW = isMobile ? 30 : 50; // 手機最多30個雪花
-        const SNOW_INTERVAL = isMobile ? 500 : 300; // 手機每500ms生成一個
-
+        // 雪花生成（原版邏輯+手機端修復）
         function createSnow() {
-            // 1. 嚴格限制雪花數量，避免GPU超載
-            const snowCount = document.querySelectorAll('.snow').length;
-            if (snowCount >= MAX_SNOW) return;
-            
             const snow = document.createElement('div');
             snow.className = 'snow';
-            snow.textContent = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
-            
-            // 2. 優化雪花位置計算，避免超出螢幕
-            const screenWidth = window.innerWidth;
-            snow.style.left = Math.min(Math.random() * screenWidth, screenWidth - 20) + 'px';
-            
-            // 3. 手機端隨機動畫時長，避免同步卡頓
-            const duration = isMobile ? (Math.random() * 3 + 4) : (Math.random() * 4 + 3);
-            snow.style.animationDuration = `${duration}s`;
-            
-            snow.style.opacity = Math.random() * 0.5 + 0.3;
+            snow.textContent = '❄';
+            snow.style.left = Math.random() * 100 + 'vw';
+            snow.style.animationDuration = Math.random() * 4 + 3 + 's';
             
             document.body.appendChild(snow);
-            
-            // 4. 及時清理雪花，避免記憶體洩漏
-            setTimeout(() => {
-                if (snow && snow.parentNode) {
-                    snow.remove();
-                }
-            }, duration * 1000 + 100);
+            setTimeout(() => snow.remove(), 7000);
         }
-
-        // 5. 手機端使用requestAnimationFrame優化定時器
-        function snowLoop() {
-            createSnow();
-            snowTimer = setTimeout(() => {
-                requestAnimationFrame(snowLoop);
-            }, SNOW_INTERVAL);
-        }
-
-        // 啟動雪花生成（頁面載入完成後執行）
-        window.addEventListener('load', () => {
-            snowLoop();
-        });
-
-        // 6. 頁面隱藏時停止雪花生成，減少耗電
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                clearTimeout(snowTimer);
-            } else {
-                snowLoop();
-            }
-        });
-
-        // 視窗大小變化優化
-        window.addEventListener('resize', () => {
-            tree.style.willChange = 'auto';
-            setTimeout(() => {
-                tree.style.willChange = 'transform';
-            }, 100);
-        });
-
-        // 頁面焦點優化
-        window.addEventListener('blur', () => {
-            if (isMusicOn) audio.pause();
-            tree.style.animationDuration = '60s';
-            clearTimeout(snowTimer); // 停止雪花生成
-        });
-
-        window.addEventListener('focus', () => {
-            if (isMusicOn) {
-                musicBtn.textContent = "🔇 點擊恢復音樂";
-                isMusicOn = false;
-            }
-            tree.style.animationDuration = '25s';
-            snowLoop(); // 恢復雪花生成
-        });
+        setInterval(createSnow, 200); // 原版生成頻率
     </script>
 </body>
 </html>
