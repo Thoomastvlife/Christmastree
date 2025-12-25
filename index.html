@@ -114,6 +114,21 @@
         @keyframes fall {
             to { transform: translateY(100vh); } /* 替換vh解析問題 */
         }
+
+        /* 版權資訊樣式 */
+        .copyright {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #ccc;
+            font-size: 12px;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 998;
+            text-shadow: 0 0 2px #666;
+        }
     </style>
 </head>
 <body>
@@ -134,6 +149,9 @@
         <h1>Merry Christmas</h1>
         <p>祝你聖誕快樂，幸福永遠</p>
     </div>
+
+    <!-- 版權資訊 -->
+    <div class="copyright">© 2025 YT集團早安咖啡, all rights reserved</div>
 
     <script>
         // 音樂控制（原版邏輯+兼容優化）
