@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聖誕快樂-浪漫聖誕樹</title>
+    <title>浪漫聖誕樹</title>
     <style>
-        /* 整體背景與佈局 */
         body {
-            background-color: #001100;
+            background-color: #000a00;
             margin: 0;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            perspective: 1000px; /* 3D 透視感 */
+            perspective: 1200px;
         }
 
-        /* 聖誕樹容器 */
+        /* 旋轉容器：確保高度與樹一致，並將旋轉中心設在樹中心 */
         .tree-container {
             position: relative;
             width: 300px;
-            height: 400px;
+            height: 450px;
             transform-style: preserve-3d;
-            animation: rotateTree 15s infinite linear; /* 自動旋轉 */
+            animation: rotateTree 12s infinite linear;
+            margin-bottom: 50px;
         }
 
         @keyframes rotateTree {
@@ -31,51 +32,40 @@
             to { transform: rotateY(360deg); }
         }
 
-        /* 樹的每一層（星光點點） */
         .dot {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #fff;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
-            opacity: 0.8;
-            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.5);
+            /* 讓光點有發光感 */
+            box-shadow: 0 0 8px 1px white;
         }
 
-        /* 頂部的星星 */
+        /* 修正星星位置，確保在最頂端 */
         .star {
             position: absolute;
-            top: -30px;
+            top: -40px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateZ(0px);
             color: gold;
-            font-size: 40px;
+            font-size: 50px;
             filter: drop-shadow(0 0 15px gold);
             z-index: 100;
         }
 
-        /* 文字樣式 */
         .message {
-            position: absolute;
-            bottom: 50px;
-            width: 100%;
             text-align: center;
             color: white;
             font-family: 'Microsoft JhengHei', sans-serif;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            pointer-events: none;
+            z-index: 10;
         }
 
-        h1 { font-size: 2.5em; margin-bottom: 0.2em; color: #ff4d4d; }
-        p { font-size: 1.2em; letter-spacing: 2px; }
+        h1 { font-size: 2em; margin: 0; color: #ff4d4d; text-shadow: 0 0 10px #fff; }
 
-        /* 雪花效果 */
         .snow {
             position: absolute;
             top: -10px;
             color: white;
-            user-select: none;
-            z-index: 1000;
             pointer-events: none;
             animation: fall linear forwards;
         }
@@ -87,42 +77,45 @@
 </head>
 <body>
 
-    <div class="star">★</div>
-
     <div class="tree-container" id="tree">
+        <div class="star">★</div>
         </div>
 
     <div class="message">
         <h1>Merry Christmas</h1>
-        <p>祝你聖誕快樂，幸福永遠</p>
+        <p>這是一份專屬你的聖誕驚喜</p>
     </div>
 
     <script>
-        // 生成聖誕樹的螺旋點位
         const treeContainer = document.getElementById('tree');
-        const dotsCount = 200; // 點的數量
+        const dotsCount = 250; 
 
         for (let i = 0; i < dotsCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot';
             
-            // 螺旋路徑算法
-            const y = i * 2; // 高度
-            const radius = (dotsCount - i) * 0.8; // 半徑隨高度遞減
-            const angle = i * 0.2; // 旋轉角度
+            // --- 修正邏輯 ---
+            // i=0 是樹頂，i=250 是樹底
+            // 高度 y 從 0 (頂) 增加到 400 (底)
+            const y = i * 1.6; 
+            // 半徑 radius 從 0 (頂) 增加到 120 (底)
+            const radius = i * 0.5; 
+            // 旋轉角度
+            const angle = i * 0.25; 
             
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             
-            // 顏色隨機變換 (金、綠、紅、白)
-            const colors = ['#f00', '#0f0', '#fff', '#ffd700'];
+            // 隨機顏色
+            const colors = ['#ff0000', '#228b22', '#ffffff', '#ffeb3b', '#00ff00'];
             dot.style.background = colors[Math.floor(Math.random() * colors.length)];
             
+            // 座標偏移：讓中心點對準容器中心
             dot.style.transform = `translate3d(${x + 150}px, ${y}px, ${z}px)`;
             treeContainer.appendChild(dot);
         }
 
-        // 生成雪花
+        // 雪花系統
         function createSnow() {
             const snow = document.createElement('div');
             snow.className = 'snow';
@@ -130,16 +123,11 @@
             snow.style.left = Math.random() * 100 + 'vw';
             snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
             snow.style.opacity = Math.random();
-            snow.style.animationDuration = (Math.random() * 3 + 2) + 's';
-            
+            snow.style.animationDuration = (Math.random() * 3 + 4) + 's';
             document.body.appendChild(snow);
-            
-            setTimeout(() => {
-                snow.remove();
-            }, 5000);
+            setTimeout(() => { snow.remove(); }, 6000);
         }
-
-        setInterval(createSnow, 100);
+        setInterval(createSnow, 150);
     </script>
 </body>
 </html>
